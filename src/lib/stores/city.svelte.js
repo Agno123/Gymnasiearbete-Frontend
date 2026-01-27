@@ -1,0 +1,1 @@
+export let city = $state({ from: '', to: '', searched: false });
