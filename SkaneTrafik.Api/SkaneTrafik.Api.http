@@ -1,0 +1,6 @@
+@SkaneTrafik.Api_HostAddress = http://localhost:5113
+
+GET {{SkaneTrafik.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
