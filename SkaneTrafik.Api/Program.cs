@@ -15,7 +15,7 @@ builder.Services.AddScoped<MySqlConnection>(_ =>
 // CORS for SvelteKit
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+     options.AddPolicy("AllowSvelte", policy =>
     {
         policy
             .WithOrigins("http://localhost:5173")

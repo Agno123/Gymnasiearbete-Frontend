@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SkaneTrafik.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1891e5e589dfb7ec686002dec34170ca7699175e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f824390731ef50966696c0946a9a5305e4692901")]
 [assembly: System.Reflection.AssemblyProductAttribute("SkaneTrafik.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SkaneTrafik.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

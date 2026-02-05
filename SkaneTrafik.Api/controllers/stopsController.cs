@@ -12,19 +12,21 @@ public class StopsController : ControllerBase
         _db = db;
     }
 
-    string name = "Ängelholm station";
-
     [HttpGet]
-    public async Task<IActionResult> GetStops()
+    public async Task<IActionResult> GetStops([FromQuery] string from)
     {
         await _db.OpenAsync();
-
         var cmd = new MySqlCommand(
-            "SELECT * FROM Stops WHERE stopName LIKE @name AND date LIKE '2025-10-04 00:00:00.000000'",
+            @"SELECT * FROM Stops
+          WHERE stopName LIKE CONCAT('%', @name, '%')
+          AND date = @date",
             _db
         );
+        Console.WriteLine($"Searching for: '{from}'");
 
-        cmd.Parameters.Add("@name", MySqlDbType.VarChar).Value = name + "%";
+        cmd.Parameters.Add("@name", MySqlDbType.VarChar).Value = from + "%";
+        cmd.Parameters.Add("@date", MySqlDbType.DateTime)
+            .Value = new DateTime(2025, 10, 4);
 
         using var reader = await cmd.ExecuteReaderAsync();
         var stops = new List<object>();
@@ -38,10 +40,9 @@ public class StopsController : ControllerBase
                 date = reader.GetDateTime("date"),
                 platformCode = reader.GetString("StopPlatformCode")
             });
-        }   
+        }
 
         await _db.CloseAsync();
-
         return Ok(stops);
     }
 }

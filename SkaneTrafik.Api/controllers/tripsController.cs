@@ -20,7 +20,7 @@ public class TripsController : ControllerBase
         await _db.OpenAsync();
 
         var cmd = new MySqlCommand(
-            "SELECT * FROM Stops WHERE stopName LIKE @name",
+            "SELECT * FROM Trips WHERE tripId LIKE @name",
             _db
         );
 

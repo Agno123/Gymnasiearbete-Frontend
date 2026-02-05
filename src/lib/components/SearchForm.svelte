@@ -4,12 +4,21 @@
     let localFrom = "";
     let localTo = "";
 
-    function search(e) {
+    let results = []; // ⬅️ data från API
+
+    async function search(e) {
         e.preventDefault();
 
         city.from = localFrom;
         city.to = localTo;
         city.searched = true;
+
+        const res = await fetch(
+            `http://localhost:5113/api/stops?from=${encodeURIComponent(localFrom)}`,
+        );
+
+        results = await res.json();
+        console.log(results);
     }
 </script>
 
