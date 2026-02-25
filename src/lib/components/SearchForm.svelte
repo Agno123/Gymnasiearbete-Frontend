@@ -1,37 +1,41 @@
 <script>
     import { city } from "$lib/stores/city.svelte";
+    import { stops } from "$lib/stores/stop.svelte.js"; // Hämtar stops som ett array-objekt?? i Stores
 
-    let localFrom = "";
+    let fromQuery = "";
     let localTo = "";
 
-    let results = []; // ⬅️ data från API
+    async function searchStops() {
+        if (fromQuery.length < 2) return;
 
-    async function search(e) {
-        e.preventDefault();
+        try {
+            const result = await fetch(
+                `http://localhost:5113/api/stops?from=${fromQuery}`,
+            );
+            if (result.ok) {
+                stops.list = await result.json();
+            }
 
-        city.from = localFrom;
-        city.to = localTo;
-        city.searched = true;
+            city.from = stop.name;
+            city.to = localTo;
+            city.searched = true;
 
-        const res = await fetch(
-            `http://localhost:5113/api/stops?from=${encodeURIComponent(localFrom)}`,
-        );
-
-        results = await res.json();
-        console.log(results);
+        } catch (err) {
+            console.error("Fetch error:", err);
+        }
     }
 </script>
 
-<form class="search-card" onsubmit={search}>
+<form class="search-card" on:submit|preventDefault>
     <div class="form-group">
         <label for="from">Från:</label>
         <input
-            id="from"
+            id="from"   
             type="text"
-            bind:value={localFrom}
-            placeholder="Ex. Malmö"
-            required
-        />
+            bind:value={fromQuery}
+            on:input={searchStops}
+            placeholder="Sök hållplats..."
+            required />
     </div>
     <div class="form-group">
         <label for="to">Till:</label>

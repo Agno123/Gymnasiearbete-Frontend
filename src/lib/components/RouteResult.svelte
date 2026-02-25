@@ -1,13 +1,12 @@
 <script>
     import RouteCard from "$lib/components/RouteCard.svelte";
     import { city } from "$lib/stores/city.svelte";
+
     let routes = [
         { departure: "08:02", arrival: "08:12", delay: 4 },
         { departure: "09:15", arrival: "09:34", delay: 10 },
         { departure: "09:15", arrival: "09:34", delay: 15 },
     ];
-
- 
 </script>
 
 {#if city.searched}

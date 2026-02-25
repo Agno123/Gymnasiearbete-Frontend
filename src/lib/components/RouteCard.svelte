@@ -1,12 +1,14 @@
 <script>
     import { city } from "$lib/stores/city.svelte";
+    import { stops } from "$lib/stores/stop.svelte.js"; //
+
     let { departure = "", arrival = "", delay = 0 } = $props();
 </script>
 
 <article class="route-card">
     <header class="card-header">
         <section class="time-info">
-            <h2>{city.from}</h2>
+            <h2>{stops.list?.[0]?.name}</h2>
             <time class="time">{departure}</time>
             <span class="label">DEPARTURE</span>
         </section>
@@ -15,7 +17,7 @@
             <span class="timeline-dot" aria-hidden="true"></span>
             <section class="timeline-details">
                 <i class="fa-solid fa-train" aria-hidden="true"></i>
-                <span class="duration">10   m</span>
+                <span class="duration">10 m</span>
                 <span class="transfer">1 transfer</span>
             </section>
             <span class="timeline-dot" aria-hidden="true"></span>
@@ -28,8 +30,9 @@
         </section>
 
         <aside
-                class="delay-tag {delay < 5 ? 'low'
-                    : delay < 15
+            class="delay-tag {delay < 5
+                ? 'low'
+                : delay < 15
                   ? 'medium'
                   : 'high'}"
         >
@@ -43,7 +46,7 @@
 
     <nav class="route-details" aria-label="Route stops">
         <ul class="stops-list">
-            <li class="stop">{city.from}</li>
+            <li class="stop">{stops.list?.[0]?.name}</li>
             <li class="arrow">
                 <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
             </li>
