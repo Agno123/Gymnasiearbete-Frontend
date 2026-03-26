@@ -6,20 +6,33 @@
     let localTo = "";
 
     async function searchStops() {
-        if (fromQuery.length < 2) return;
+        // Vänta tills användaren skrivit minst 2 tecken i något av fälten
+        if (fromQuery.length < 2 && localTo.length < 2) return;
 
         try {
-            const result = await fetch(
-                `http://localhost:5113/api/stops?from=${fromQuery}`,
+            // Vi skickar med både 'from' och 'to' som query-parametrar
+            const response = await fetch(
+                `http://localhost:5113/api/stops?from=${fromQuery}&to=${localTo}`,
             );
-            if (result.ok) {
-                stops.list = await result.json();
+
+            if (response.ok) {
+                const data = await response.json();
+                stops.list = data;
+
+                // Logik för att uppdatera city-storen
+                // Vi letar i listan vi fick tillbaka efter matchningar
+                const fromMatch = data.find((s) =>
+                    s.name.toLowerCase().includes(fromQuery.toLowerCase()),
+                );
+                const toMatch = data.find((s) =>
+                    s.name.toLowerCase().includes(localTo.toLowerCase()),
+                );
+
+                if (fromMatch) city.from = fromMatch.name;
+                if (toMatch) city.to = toMatch.name;
+
+                city.searched = true;
             }
-
-            city.from = stop.name;
-            city.to = localTo;
-            city.searched = true;
-
         } catch (err) {
             console.error("Fetch error:", err);
         }
@@ -30,12 +43,13 @@
     <div class="form-group">
         <label for="from">Från:</label>
         <input
-            id="from"   
+            id="from"
             type="text"
             bind:value={fromQuery}
             on:input={searchStops}
             placeholder="Sök hållplats..."
-            required />
+            required
+        />
     </div>
     <div class="form-group">
         <label for="to">Till:</label>
