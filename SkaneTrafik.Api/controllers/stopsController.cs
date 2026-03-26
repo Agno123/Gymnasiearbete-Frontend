@@ -13,20 +13,21 @@ public class StopsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStops([FromQuery] string from)
+    public async Task<IActionResult> GetStops([FromQuery] string query) 
     {
+        if (string.IsNullOrEmpty(query)) return Ok(new List<object>());
+
         await _db.OpenAsync();
         var cmd = new MySqlCommand(
-            @"SELECT * FROM Stops
-          WHERE stopName LIKE CONCAT('%', @name, '%')
+            @"SELECT stopId, stopName, date, StopPlatformCode FROM Stops 
+          WHERE stopName LIKE @name 
           AND date = @date",
             _db
         );
-        Console.WriteLine($"Searching for: '{from}'");
 
-        cmd.Parameters.Add("@name", MySqlDbType.VarChar).Value = from + "%";
-        cmd.Parameters.Add("@date", MySqlDbType.DateTime)
-            .Value = new DateTime(2025, 10, 4);
+        // Använd bara ett ställe för wildcards för att ha kontroll
+        cmd.Parameters.AddWithValue("@name", $"%{query}%");
+        cmd.Parameters.AddWithValue("@date", new DateTime(2025, 10, 4));
 
         using var reader = await cmd.ExecuteReaderAsync();
         var stops = new List<object>();

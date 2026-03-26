@@ -1,6 +1,7 @@
 <script>
     import RouteCard from "$lib/components/RouteCard.svelte";
     import { city } from "$lib/stores/city.svelte";
+    import { stops } from "$lib/stores/stop.svelte.js";
 
     let routes = [
         { departure: "08:02", arrival: "08:12", delay: 4 },
@@ -16,6 +17,8 @@
                 departure={route.departure}
                 arrival={route.arrival}
                 delay={route.delay}
+                fromName={stops.fromList[0]?.name ?? "Söker..."}
+                toName={stops.toList[0]?.name ?? "Söker..."}
             />
         {/each}
     </div>

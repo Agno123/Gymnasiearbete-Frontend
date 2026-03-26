@@ -1,14 +1,18 @@
 <script>
-    import { city } from "$lib/stores/city.svelte";
-    import { stops } from "$lib/stores/stop.svelte.js"; //
-
-    let { departure = "", arrival = "", delay = 0 } = $props();
+    // Vi tar emot namnen utifrån (från RouteResult)
+    let {
+        departure = "",
+        arrival = "",
+        delay = 0,
+        fromName = "Hållplats",
+        toName = "Destination",
+    } = $props();
 </script>
 
 <article class="route-card">
     <header class="card-header">
         <section class="time-info">
-            <h2>{stops.list?.[0]?.name}</h2>
+            <h2>{fromName}</h2>
             <time class="time">{departure}</time>
             <span class="label">DEPARTURE</span>
         </section>
@@ -24,7 +28,7 @@
         </div>
 
         <section class="time-info">
-            <h2>{city.to}</h2>
+            <h2>{toName}</h2>
             <time class="time">{arrival}</time>
             <span class="label">ARRIVAL</span>
         </section>
@@ -46,15 +50,11 @@
 
     <nav class="route-details" aria-label="Route stops">
         <ul class="stops-list">
-            <li class="stop">{stops.list?.[0]?.name}</li>
-            <li class="arrow">
-                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </li>
+            <li class="stop">{fromName}</li>
+            <li class="arrow"><i class="fa-solid fa-arrow-right"></i></li>
             <li class="stop">Mellan Station</li>
-            <li class="arrow">
-                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-            </li>
-            <li class="stop">{city.to}</li>
+            <li class="arrow"><i class="fa-solid fa-arrow-right"></i></li>
+            <li class="stop">{toName}</li>
         </ul>
     </nav>
 </article>

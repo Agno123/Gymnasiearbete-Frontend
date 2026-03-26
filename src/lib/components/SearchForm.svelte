@@ -1,52 +1,65 @@
 <script>
     import { city } from "$lib/stores/city.svelte";
-    import { stops } from "$lib/stores/stop.svelte.js"; // Hämtar stops som ett array-objekt?? i Stores
+    import { stops } from "$lib/stores/stop.svelte.js";
 
-    let fromQuery = "";
-    let localTo = "";
+    let fromQuery = $state("");
+    let toQuery = $state("");
 
-    async function searchStops() {
-        // Vänta tills användaren skrivit minst 2 tecken i något av fälten
-        if (fromQuery.length < 2 && localTo.length < 2) return;
+    async function searchFromStops() {
+        if (fromQuery.length < 2) {
+            stops.fromList = []; // Rensa listan om söksträngen är för kort
+            return;
+        }
 
         try {
-            // Vi skickar med både 'from' och 'to' som query-parametrar
             const response = await fetch(
-                `http://localhost:5113/api/stops?from=${fromQuery}&to=${localTo}`,
+                `http://localhost:5113/api/stops?query=${encodeURIComponent(fromQuery)}`,
             );
 
             if (response.ok) {
                 const data = await response.json();
-                stops.list = data;
-
-                // Logik för att uppdatera city-storen
-                // Vi letar i listan vi fick tillbaka efter matchningar
-                const fromMatch = data.find((s) =>
-                    s.name.toLowerCase().includes(fromQuery.toLowerCase()),
-                );
-                const toMatch = data.find((s) =>
-                    s.name.toLowerCase().includes(localTo.toLowerCase()),
-                );
-
-                if (fromMatch) city.from = fromMatch.name;
-                if (toMatch) city.to = toMatch.name;
-
+                stops.fromList = data; // Uppdaterar din svelte.js store
                 city.searched = true;
+            } else {
+                console.error("Serverfel:", response.status);
             }
         } catch (err) {
-            console.error("Fetch error:", err);
+            console.error("Kunde inte nå API:", err);
+        }
+    }
+
+    async function searchToStops() {
+        if (toQuery.length < 2) {
+            stops.toList = [];
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `http://localhost:5113/api/stops?query=${encodeURIComponent(toQuery)}`,
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                stops.toList = data;
+                city.searched = true;
+            } else {
+                console.error("Serverfel:", response.status);
+            }
+        } catch (err) {
+            console.error("Kunde inte nå API:", err);
         }
     }
 </script>
 
-<form class="search-card" on:submit|preventDefault>
+<form class="search-card" onsubmit={(e) => e.preventDefault()}>
     <div class="form-group">
         <label for="from">Från:</label>
         <input
             id="from"
             type="text"
             bind:value={fromQuery}
-            on:input={searchStops}
+            oninput={searchFromStops}
             placeholder="Sök hållplats..."
             required
         />
@@ -56,7 +69,8 @@
         <input
             id="to"
             type="text"
-            bind:value={localTo}
+            bind:value={toQuery}
+            oninput={searchToStops}
             placeholder="Ex. Lund"
             required
         />

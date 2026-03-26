@@ -1,1 +1,4 @@
-export let stops = $state({list: []});
+export const stops = $state({
+    fromList: [],
+    toList: []
+});
