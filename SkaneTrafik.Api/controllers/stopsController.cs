@@ -13,20 +13,30 @@ public class StopsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetStops([FromQuery] string query) 
+    public async Task<IActionResult> GetStops([FromQuery] string query)
     {
         if (string.IsNullOrEmpty(query)) return Ok(new List<object>());
 
         await _db.OpenAsync();
         var cmd = new MySqlCommand(
-            @"SELECT stopId, stopName, date, StopPlatformCode FROM Stops 
-          WHERE stopName LIKE @name 
-          AND date = @date",
+            @"SELECT stopId, stopName, date, StopPlatformCode 
+                FROM Stops 
+                WHERE stopName LIKE @name 
+                AND date = @date
+                ORDER BY 
+                    CASE 
+                        WHEN stopName = @exact THEN 0
+                        WHEN stopName LIKE @starts THEN 1
+                        ELSE 2
+                    END,
+                    stopName ASC;",
             _db
         );
 
         // Använd bara ett ställe för wildcards för att ha kontroll
         cmd.Parameters.AddWithValue("@name", $"%{query}%");
+        cmd.Parameters.AddWithValue("@exact", query);
+        cmd.Parameters.AddWithValue("@starts", $"{query}%");
         cmd.Parameters.AddWithValue("@date", new DateTime(2025, 10, 4));
 
         using var reader = await cmd.ExecuteReaderAsync();
