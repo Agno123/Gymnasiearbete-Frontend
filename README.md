@@ -1,38 +1,126 @@
-# sv
+🚆 Skånetrafik Resplanerare (Fullstack)
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+En fullstack-applikation för att söka hållplatser och hitta direkta resor mellan stationer i Skåne, byggd med:
 
-## Creating a project
+Backend: ASP.NET Core + MySQL
+Frontend: SvelteKit
+Data: GTFS (General Transit Feed Specification)
+📦 Funktioner
+🔍 Sök hållplatser (autocomplete)
+🚏 Hantering av stationer och plattformar (ParentStation)
+🧭 Hitta direkta resor mellan två stationer
+⏱ Visar avgång, ankomst och restid
+⚡ Optimerad SQL för snabbare queries
+🧠 Datamodell (GTFS)
 
-If you're seeing this, you've probably already done this step. Congrats!
+Projektet bygger på följande tabeller:
 
-```sh
-# create a new project in the current directory
-npx sv create
+Stops
+StopTimes
+Trips
+Routes
+Relationer
+Stop (station)
+  ↓ ParentStation
+Stop (plattform/läge)
+  ↓ StopId
+StopTimes
+  ↓ TripId
+Trips
+  ↓ RouteId
+Routes
+⚙️ Backend (ASP.NET Core)
+📁 Struktur
+Controllers/
+StopsController
+TripsController
+Services/
+StopsService
+Models/
+Stop, Trip, Route, StopTime etc.
+🚀 Starta backend
+Installera beroenden
+Lägg in connection string i appsettings.json:
+{
+  "ConnectionStrings": {
+    "SkaneTrafikDb": "server=localhost;user=root;password=xxx;database=skanetrafik;"
+  }
+}
+Kör projektet:
+dotnet run
 
-# create a new project in my-app
-npx sv create my-app
-```
+Backend startar på t.ex:
 
-## Developing
+http://localhost:5113
+📡 API Endpoints
+🔍 Sök hållplatser
+GET /api/stops?query=malmö
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Returnerar:
 
-```sh
+[
+  {
+    "id": "9021012080000000",
+    "name": "Malmö C",
+    "parentStation": "",
+    "locationType": "1"
+  }
+]
+🚆 Hitta resa
+GET /api/trips?fromParentStation=ID&toParentStation=ID
+
+Exempel:
+
+http://localhost:5113/api/trips?fromParentStation=9021012080000000&toParentStation=9021012080040000
+⚡ Prestanda
+
+För att undvika långsamma queries används:
+
+filtrering tidigt (ParentStation → StopTimes)
+JOIN endast på relevant data
+index i databasen
+🔧 Rekommenderade index
+CREATE INDEX idx_stops_parent_date_stopid
+ON Stops (ParentStation, date, StopId);
+
+CREATE INDEX idx_stoptimes_stopid_date_tripid_id
+ON StopTimes (StopId, date, TripId, Id);
+
+CREATE INDEX idx_stoptimes_tripid_date_id
+ON StopTimes (TripId, date, Id);
+
+CREATE INDEX idx_trips_tripid_date_routeid
+ON Trips (TripId, date, RouteId);
+
+CREATE INDEX idx_routes_routeid_date
+ON Routes (RouteId, date);
+🎨 Frontend (SvelteKit)
+Funktioner
+🔎 Live-sökning av hållplatser
+👆 Val av station
+🔁 Skicka station-ID till backend
+📊 Visa resa
+🚀 Starta frontend
+npm install
 npm run dev
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+Startar på:
 
-## Building
+http://localhost:5173
+🔗 CORS (Backend)
 
-To create a production version of your app:
+Backend tillåter frontend via:
 
-```sh
-npm run build
-```
+.WithOrigins("http://localhost:5173")
+🔄 Dataimport (GTFS)
 
-You can preview the production build with `npm run preview`.
+Projektet innehåller importer för:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+routes.txt
+trips.txt
+stops.txt
+stop_times.txt
+Viktigt
+Alla tabeller måste ha samma date per import
+ParentStation används för att koppla station ↔ plattform
+StopTimes används för att hitta resor
