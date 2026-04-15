@@ -33,7 +33,6 @@ public class StopsController : ControllerBase
             _db
         );
 
-        // Använd bara ett ställe för wildcards för att ha kontroll
         cmd.Parameters.AddWithValue("@name", $"%{query}%");
         cmd.Parameters.AddWithValue("@exact", query);
         cmd.Parameters.AddWithValue("@starts", $"{query}%");

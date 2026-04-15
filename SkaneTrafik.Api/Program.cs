@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
      options.AddPolicy("AllowSvelte", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins("http://localhost:5173", "http://localhost")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -27,6 +27,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowSvelte"); 
+
 
 app.MapControllers();
 app.Run();

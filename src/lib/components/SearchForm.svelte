@@ -18,7 +18,7 @@
 
             if (response.ok) {
                 const data = await response.json();
-                stops.fromList = data; // Uppdaterar din svelte.js store
+                stops.fromList = data; // Uppdaterar svelte.js store
                 city.searched = true;
             } else {
                 console.error("Serverfel:", response.status);
