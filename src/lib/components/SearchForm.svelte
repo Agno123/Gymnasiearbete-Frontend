@@ -13,8 +13,8 @@
 
         try {
             const response = await fetch(
-                `http://localhost:5113/api/stops?query=${encodeURIComponent(fromQuery)}`,
-            );
+                    `http://localhost:5113/api/stops?query=${encodeURIComponent(fromQuery)}`,
+                );
 
             if (response.ok) {
                 const data = await response.json();
