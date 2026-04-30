@@ -2,19 +2,25 @@
     import { city } from "$lib/stores/city.svelte";
     import { stops } from "$lib/stores/stop.svelte.js";
 
+    // Lokala inputvärden innan användaren skickar en resesökning.
     let fromQuery = $state("");
     let toQuery = $state("");
 
+    // Hårdkodat resdatum som skickas till backendens rese-endpoint.
+    const travelDate = "2025-10-04";
+
     async function searchFromStops() {
+        // Vänta med API-anrop tills användaren har skrivit nog många tecken.
         if (fromQuery.length < 2) {
             stops.fromList = []; // Rensa listan om söksträngen är för kort
             return;
         }
 
         try {
+            // Fråga backend efter matchande avgångshållplatser.
             const response = await fetch(
-                    `http://localhost:5113/api/stops?query=${encodeURIComponent(fromQuery)}`,
-                );
+                `http://localhost:5113/api/stops?query=${encodeURIComponent(fromQuery)}`,
+            );
 
             if (response.ok) {
                 const data = await response.json();
@@ -29,12 +35,14 @@
     }
 
     async function searchToStops() {
+        // Rensa gamla destinationsförslag när söktexten är för kort.
         if (toQuery.length < 2) {
             stops.toList = [];
             return;
         }
 
         try {
+            // Fråga backend efter matchande ankomsthållplatser.
             const response = await fetch(
                 `http://localhost:5113/api/stops?query=${encodeURIComponent(toQuery)}`,
             );
@@ -50,9 +58,50 @@
             console.error("Kunde inte nå API:", err);
         }
     }
+
+    async function searchJourney() {
+        // Skicka inte en tom resesökning.
+        if (!fromQuery.trim() || !toQuery.trim()) return;
+
+        // Använd första API-förslaget, annars det användaren skrev.
+        city.from = stops.fromList[0].name;
+        city.to = stops.toList[0].name;
+        city.searched = true;
+
+        // Nollställ resultatvyn innan nya resor laddas.
+        stops.loadingRoutes = true;
+        stops.routeError = "";
+        stops.routes = [];
+
+        // Bygg query-parametrar i ett URL-vänligt format.
+        const params = new URLSearchParams({
+            startName: city.from,
+            endName: city.to,
+            date: travelDate,
+        });
+
+        try {
+            // Hämta resalternativ mellan valda hållplatser.
+            const response = await fetch(
+                `http://localhost:5113/api/travel/time?${params.toString()}`,
+            );
+
+            if (response.ok) {
+                stops.routes = await response.json();
+            } else {
+                stops.routeError = `Kunde inte hämta resor (${response.status}).`;
+            }
+        } catch (err) {
+            stops.routeError = "Kunde inte nå API:t.";
+            console.error("Kunde inte nå API:", err);
+        } finally {
+            stops.loadingRoutes = false;
+        }
+    }
 </script>
 
-<form class="search-card" onsubmit={(e) => e.preventDefault()}>
+<!-- Formuläret söker resa utan att ladda om sidan. -->
+<form class="search-card" onsubmit={(e) => { e.preventDefault(); searchJourney(); }}>
     <div class="form-group">
         <label for="from">Från:</label>
         <input
@@ -79,6 +128,7 @@
 </form>
 
 <style>
+    /* Delade färgvariabler för sökkortet. */
     :root {
         --primary-red: #d90000;
         --light-red: #ffe5e5;
@@ -91,22 +141,23 @@
 
     .search-card {
         background-color: var(--white);
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        padding: 20px;
+        border-radius: 0.75rem;
+        box-shadow: 0 0.25rem 0.625rem rgba(0, 0, 0, 0.1);
+        padding: 1.25rem;
         width: 100%;
-        max-width: 600px;
+        max-width: 37.5rem;
         margin: 1rem;
         display: flex;
         flex-direction: column;
-        gap: 15px;
-        border-left: 8px solid var(--primary-red);
+        gap: 0.9375rem;
+        border-left: 0.5rem solid var(--primary-red);
     }
 
+    /* Staplar varje label direkt ovanför sitt inputfält. */
     .form-group {
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 0.3125rem;
     }
 
     label {
@@ -115,10 +166,11 @@
         color: var(--light-text);
     }
 
+    /* Inputfält får en diskret fokusring när de är aktiva. */
     input {
-        padding: 10px 12px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+        padding: 0.625rem 0.75rem;
+        border: 0.0625rem solid var(--border-color);
+        border-radius: 0.5rem;
         font-size: 1em;
         color: var(--dark-text);
         background-color: var(--light-bg);
@@ -130,16 +182,17 @@
     input:focus {
         outline: none;
         border-color: var(--primary-red);
-        box-shadow: 0 0 0 3px rgba(217, 0, 0, 0.15);
+        box-shadow: 0 0 0 0.1875rem rgba(217, 0, 0, 0.15);
     }
 
+    /* Primär knapp som startar resesökningen. */
     button {
         align-self: flex-start;
         background-color: var(--primary-red);
         color: var(--white);
-        padding: 12px 20px;
+        padding: 0.75rem 1.25rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 0.5rem;
         font-size: 1em;
         font-weight: bold;
         cursor: pointer;

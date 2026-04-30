@@ -1,1 +1,1 @@
-// place files you want to import through the `$lib` alias in this folder.
+// Lägg filer här om du vill importera dem via `$lib`-aliaset.

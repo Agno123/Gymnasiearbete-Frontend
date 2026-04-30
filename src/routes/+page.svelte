@@ -1,10 +1,12 @@
 <script>
+    // Huvudkomponenter som söker och visar resor.
     import SearchForm from "$lib/components/SearchForm.svelte";
     import RouteCard from "$lib/components/RouteCard.svelte";
     import RouteResult from "$lib/components/RouteResult.svelte";
     import ApiResultTest from "$lib/components/ApiResultTest.svelte";
 
 
+    // Sidans stil och delade sökstatus.
     import { fade, fly, scale } from "svelte/transition";
     import { city } from "$lib/stores/city.svelte";
 
@@ -18,7 +20,6 @@
 
     <SearchForm />
     <RouteResult />
-    <ApiResultTest />
 
 <style>
 </style>
